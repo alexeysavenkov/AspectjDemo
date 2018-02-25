@@ -6,8 +6,16 @@ import com.naukma.aspectj.entities.Interviewer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component
+@Component(value="annotatedInterview")
 public class InterviewImpl implements Interview {
+
+    public void setApplicant(Applicant applicant) {
+        this.applicant = applicant;
+    }
+
+    public void setInterviewer(Interviewer interviewer) {
+        this.interviewer = interviewer;
+    }
 
     @Autowired
     private Applicant applicant;

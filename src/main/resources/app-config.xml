@@ -1,10 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+        http://www.springframework.org/schema/p"
        xmlns:aop = "http://www.springframework.org/schema/aop"
        xmlns:p="http://www.springframework.org/schema/p" >
 
-    <aop:aspectj-autoproxy />
+    <!--<aop:aspectj-autoproxy />-->
+
+    <bean id="interviewer" class="com.naukma.aspectj.entities.impl.InterviewerImpl"/>
+    <bean id="applicant" class="com.naukma.aspectj.entities.impl.ApplicantImpl"/>
+    <bean id="interview" class="com.naukma.aspectj.entities.impl.InterviewImpl"
+        p:applicant-ref="applicant"
+        p:interviewer-ref="interviewer"
+    />
+    <bean id="interview-stats" class="com.naukma.aspectj.aspects.InterviewStatsAspectXMLBased" factory-method="aspectOf"/>
+
+    <aop:config>
+        <aop:aspect id="interview-stats-aspect" ref="interview-stats">
+            <aop:before pointcut="execution(void com.naukma.aspectj.entities.Interview.runInterview(..))"
+                        method="reset"/>
+            <aop:around pointcut="execution(String com.naukma.aspectj.entities.Applicant.tryAnswerQuestion(String))"
+                        method="applicantAnswerLogger"/>
+            <aop:after-returning
+                        pointcut="execution(boolean com.naukma.aspectj.entities.Interviewer.checkAnswerCorrectness(..))"
+                        returning="retVal"
+                        method="onInterviewerCorrectnessCheck"/>
+            <aop:after-throwing
+                        pointcut="execution(String com.naukma.aspectj.entities.Applicant.tryAnswerQuestion(String))"
+                        method="onApplicantAnswerException"/>
+        </aop:aspect>
+    </aop:config>
 
 </beans>
